@@ -1,0 +1,14 @@
+mg996r -spec
+Dimension : 40 x 19 x 43mm
+Weight : 55g
+Operating Speed : 0.17sec / 60 degrees (4.8V no load)
+Operating Speed : 0.13sec / 60 degrees (6.0V no load)
+Stall Torque : 13 kg-cm (180.5 oz-in) at 4.8V
+Stall Torque : 15 kg-cm (208.3 oz-in) at 6V
+Operation Voltage : 4.8 - 7.2Volts
+Gear Type: All Metal Gears
+Connector Wire: 11.81"  (300mm)
+Color: Black
+Compliant with most standard receiver connector: Futaba, Hitec, Sanwa, GWS etc...
+Great for truck, Boat, Racing Car, Helicopter and Airplane.
+Power Supply: Through External Adapter

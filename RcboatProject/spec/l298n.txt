@@ -1,0 +1,46 @@
+l298n -spec
+Module name : dual H bridge motor drive module
+Work mode : H bridge drive (double road)
+Main control chip : L298N
+Packaging : electrostatic bag
+Logical voltage : 5V
+Drive voltage : 5v-35v
+Logical current : 0mA-36mA
+Driving current : 2A(MAX single bridge)
+Storage temperature : - 20 ℃ to + 135 ℃
+Maximum power : 25W
+Weight : 30 g
+Peripheral dimensions : 43*43*27mm
+
+Product features:
+L298N เป็นวงจรขับมอเตอร์ที่มีคุณสมบัติดังนี้:
+
+สามารถขับมอเตอร์ DC 2 ตัวพร้อมกันได้ หรือขับมอเตอร์ขนาดใหญ่ด้วยระบบ H-Bridge
+สามารถควบคุมทิศทางหมุนของมอเตอร์ไปข้างหน้าหรือถอยหลังได้
+มีระบบปกป้องการลัดวงจรและความร้อนสูงเกินพิกัด
+สามารถจ่ายกระแสให้มอเตอร์ได้สูงสุดประมาณ 2 แอมป์ต่อช่อง
+ใช้สัญญาณควบคุมแบบลอจิก พร้อมขั้วอินพุตและกราวด์สำหรับต่อกับไมโครคอนโทรลเลอร์
+โมดูล L298N จึงเป็นโมดูลที่นิยมนำมาใช้ในการสร้างวงจรขับเคลื่อนระบบหุ่นยนต์ หรืออุปกรณ์ที่ต้องการควบคุมมอเตอร์ DC ขนาดเล็กถึงกลางค่อนข้างง่าย
+ 
+This module USES L298N as the main drive chip, with strong driving ability, low heat and strong anti-interference ability.
+ 
+Through this module can use the built-in 78 m05 drive power supply parts of their work, but in order to avoid the voltage regulator chip damage, when using the driving voltage is greater than 12 v, please use the external power supply 5 v logic.
+ 
+This module USES a large capacity filter capacitance, a continuation protection diode, can improve reliability.
+ 
+หมายเหตุ:
+
+เมื่อคุณจ่ายแรงดันขับ (ขั้วต่อ 12V เหนือโลโก้ สามารถรับช่วงแรงดันอินพุตได้ระหว่าง 7-12V) ในช่วง 7-12V จะสามารถจ่ายแรงดันไฟเลี้ยง 5V ให้กับวงจรลอจิกบนบอร์ดได้ เมื่อใช้ภายในบอร์ดจากแรงดันไฟเลี้ยง 5V แล้ว ที่ขั้วต่อ +5V ไม่จำเป็นต้องจ่ายแรงดันอินพุต แต่จะมีแรงดัน 5V ที่สามารถนำไปใช้ภายนอกได้
+เมื่อแรงดันขับสูงกว่า 12V แต่ไม่เกิน 24V (ตามคู่มือ ไอซีรองรับได้สูงสุด 35V แต่เพื่อความปลอดภัย ควรใช้ไม่เกิน 24V เช่นขับมอเตอร์แรงดันเรตติ้ง 18V) คุณต้องถอดจั๊มเปอร์แคปบนบอร์ดออกเพื่อตัดการจ่ายแรงดัน 5V ออกจากบอร์ด แล้วให้นำแรงดัน 5V เข้ามาจากภายนอกที่ขั้วต่อ 5V เอาต์พุต แรงดัน 5V จะถูกใช้เป็นสัญญาณควบคุมระดับ 5V เมื่อสัญญาณอินพุตมีผล และมีแรงดันจ่ายปกติในมอดูลขับมอเตอร์ มอดูลจะส่งกระแสให้มอเตอร์ หากไม่มีสัญญาณอินพุตถูกต้อง แม้จะมีแรงดันจ่ายปกติ ก็จะไม่มีกระแสออกจากมอดูล
+แรงดัน 5V จะถูกนำมาจ่ายให้วงจรลอจิกควบคุมภายใน L298N (นี่เป็นการใช้งานในกรณีพิเศษสำหรับแรงดันสูงกว่าปกติ)
+
+Notes:
+1. When you are driving voltage (above logo for the 12 v input, can actually accept input range is 7 to 12 v) for 7 v to 12 v, can make to onboard power supply 5 v logic, when using the onboard after 5 v power supply, interface of + 5 v
+The power supply does not input voltage, but can yield 5V voltage for external use.
+ 
+2. When the driving voltage is higher than 12V, it is less than or equal to 24V
+(the chip manual proposes to support 35V, but according to the book
+When the maximum voltage is applied to the maximum voltage of 298 conservative applications to 24V, for example, the motor with a rated voltage of 18V shall be driven.
+You must first remove the board 5V output to enable the jumper cap. Then 5V is accessed outside the 5V output port
+The 5V enables the power to be a control signal with a level of 5V. When the signal input is valid, and when the power supply is normal in the motor drive module, the motor drive module outputs the current. Otherwise, even if the power supply is normal, there is no current on the motor.
+Voltage to L298N internal logic circuit power supply. (this is a high-pressure, unconventional app!)

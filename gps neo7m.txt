@@ -1,0 +1,13 @@
+gps neo7m -spec
+GPS modules NEO-7M, 3V-5V power supply
+Using imported u-blox NEO-7M-0-000 GPS module
+Module with ceramic destined antenna, signal super
+EEPROM power down to save the configuration parameter data
+With data backup battery
+There are LED lights
+High quality Immersion Gold PCB
+Antenna Size: 25*25mm/0.98*0.98"
+Module Size: 25*35mm/0.98*1.37"
+Installation Diameter: 3mm
+Supply Voltage: 3V-5V
+The default baud rate: 9600

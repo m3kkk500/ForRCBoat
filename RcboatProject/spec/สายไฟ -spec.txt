@@ -1,0 +1,9 @@
+สายไฟ -spec
+Name: UL1007 20AWG wire
+Conductor: 21*0.14 mm. (tinned copper wire)
+Temperature: 80 ° C
+Voltage: 300V
+Outer diameter: 1.8mm
+Current Rating: 11 A  (chassis wiring)
+Features: PVC electronic wire, tinned copper wire, using standard thickness, easy to peel and cut.
+Uses: Internal wiring of electrical and electronic equipment.

@@ -1,0 +1,361 @@
+ข้อมูลฐานรากของโครงการ (Project Base Data - Latest Edition 2026)โครงการ: เรือบังคับตรวจจับกระแสไฟฟ้ารั่วไหลในแหล่งน้ำแบบแจ้งเตือนภัยผ่าน Telegram IoT 1. ภาพรวมโครงการ (Project Overview)โครงการนี้เป็นการพัฒนาตัวต้นแบบยานผิวน้ำไร้คนขับ (USV) โดยการดัดแปลงโครงสร้างเรือกระบะเหยื่อล่อ (Bait Boat)  ให้เป็นเรือลาดตระเวนอัจฉริยะเพื่อค้นหาและระบุตำแหน่งกระแสไฟฟ้ารั่วไหลกระแสสลับ (AC) ในแหล่งน้ำเปิด บ่อเลี้ยงสัตว์น้ำ หรือพื้นที่สาธารณะ  เพื่อป้องกันอันตรายร้ายแรงต่อชีวิตมนุษย์และสิ่งมีชีวิตในน้ำ ระบบควบคุมประมวลผลถูกออกแบบตามสถาปัตยกรรมประมวลผลคู่ (Dual-Core Processing) บนไมโครคอนโทรลเลอร์ ESP32 ภายใต้ระบบปฏิบัติการเรียลไทม์ FreeRTOS เพื่อแยกส่วนงานควบคุมทางกลแบบทันที (Real-time Flight Control)  ออกจากส่วนงานสื่อสารผ่านเครือข่ายอินเทอร์เน็ต (Network Tasks) อย่างเด็ดขาด ป้องกันปัญหาเรือขาดการตอบสนองขณะส่งผ่านข้อมูล 2. ข้อมูลเฉพาะฮาร์ดแวร์และโครงสร้างทางวิศวกรรม (Hardware Specifications)2.1 ไมโครคอนโทรลเลอร์ประมวลผลหลัก (MCU Core)โมดูลประมวลผล: ESP32-WROOM-32 (พอร์ตอัปโหลดโปรแกรม Type-C พร้อมชิปแปลงสัญญาณ USB-to-UART CP2102) คุณลักษณะเด่น: หน่วยประมวลผลแบบ Dual-core 32-bit ความเร็วสูงสุด $240\text{ MHz}$ มีหน่วยความจำ SRAM ขนาด $520\text{ KB}$ ภายใน  รองรับการสื่อสารไร้สาย WiFi และ Bluetooth 4.2 การจัดสรรระบบประมวลผล (FreeRTOS Core Allocation):Core 0 (Network & Location): ทำหน้าที่สกัดค่าพิกัด NMEA จากดาวเทียมผ่านจีพีเอส และประมวลผลคิวการส่งข้อความแจ้งเตือนภัยทางอินเทอร์เน็ตผ่าน Telegram Bot API Core 1 (Real-time Control & DSP): ทำหน้าที่รับสัญญาณควบคุมไร้สาย iBUS , ควบคุมการเดินมอเตอร์ด้วย PWM , ควบคุมองศาเซอร์โวมอเตอร์ MG996R , และสุ่มตรวจสัญญาณอนาล็อกความเร็วสูงเพื่อคำนวณหาค่า True RMS AC Voltage จากเซ็นเซอร์วัดไฟรั่ว 2.2 สถาปัตยกรรมการจัดสรรกำลังไฟฟ้า (Power Network Architecture)โครงข่ายพลังงานหลักของระบบได้รับการออกแบบแบบ แยกรางกำลังไฟ (Balanced Split Power Rail) เพื่อรักษาระดับแรงดันลอจิกให้เรียบสม่ำเสมอ และตัดปัญหาสัญญาณรบกวนแม่เหล็กไฟฟ้า (EMI) รวมถึงปัญหาบอร์ดดับกะทันหันอันเนื่องมาจากมอเตอร์ดึงกระแสเกินขีดจำกัด (Logic Brownout) :แหล่งพลังงานเมนหลัก (Main Battery Unit): แบตเตอรี่ลิเธียมไอออนชนิด 18650 จำนวน 4 ก้อน ต่อแบบอนุกรมและขนาน (2S2P Configuration) แรงดันใช้งานปกติ (Nominal Voltage): $7.4\text{ V}$ ($8.4\text{ V}$ เมื่อประจุไฟเต็ม และปล่อยประจุตัดขั้นต่ำที่ $6.0\text{ V}$) ความจุพลังงานรวม (Total Capacity): $5200\text{ mAh}$ รางกำลังขับเคลื่อนมอเตอร์หลัก (Main Drive Power Rail - 7.4V):แหล่งจ่ายกำลัง: ต่อตรงจากขั้วบวกและขั้วลบของแบตเตอรี่ $7.4\text{ V}$  ไปยังพอร์ตรับกำลังของวงจรขับมอเตอร์ L298N การควบคุมสัญญาณกระชาก: ติดตั้งตัวเก็บประจุอลูมิเนียมอิเล็กโทรไลต์ ยี่ห้อ SAMXON รุ่น KM Series ขนาด $1000\,\mu\text{F} / 16\text{ V}$ (อุณหภูมิใช้งานสูงสุด $105^\circ\text{ C}$ อายุใช้งาน 2,000 ชั่วโมง ค่าความคลาดเคลื่อน $\pm 20\%$) คร่อมขั้วไฟเข้า L298N โดยตรงเพื่อทำหน้าที่เป็นบัฟเฟอร์พลังงานลดทอนสัญญาณรบกวนจากการหมุนของแปรงถ่านมอเตอร์ รางกำลังระบบเซอร์โวกลไก (Servo Actuator Power Rail - 6.0V):แหล่งจ่ายกำลัง: ผ่านโมดูลสวิตชิ่งสเตปดาวน์ UBEC 5A แปลงแรงดันจากแบตเตอรี่ลงมาคงที่ที่ $6.0\text{ V}$ (ปรับสวิตช์เลือกพิกัดบนบอร์ด) การจ่ายกระแส: รองรับการจ่ายกระแสไฟทำงานต่อเนื่องได้ที่ $5\text{ A}$ และทนกระแสกระชากชั่วขณะได้สูงสุดถึง $15\text{ A}$  เพื่อความปลอดภัยในการดึงโหลดของเซอร์โวมอเตอร์แรงบิดสูง MG996R จำนวน 3 ตัว (ซึ่งมีกระแส Stall Current สูงถึงตัวละ $2.5\text{ A}$ ที่แรงดัน $6.0\text{ V}$) รางกำลังส่วนประมวลผลลอจิกและเซ็นเซอร์ (Logic & Sensors Power Rail - 5.0V):แหล่งจ่ายกำลัง: ผ่านบอร์ดแปลงแรงดันกระแสตรงสเตปดาวน์สวิตชิ่ง LM2596S ปรับลดแรงดันแบตเตอรี่มาคงที่ที่ $5.0\text{ V}$ อย่างเสถียร อุปกรณ์รับกำลังไฟ: จ่ายไปเลี้ยงขา VIN ของบอร์ด ESP32 , โมดูล GPS NEO-7M , เครื่องรับสัญญาณ iA6B  และบอร์ดเซ็นเซอร์ ZMPT101B  เพื่อให้สเกลแรงดันอ้างอิงของส่วนวัดอนาล็อก (ADC) มีความคงที่เที่ยงตรงสูง 2.3 ชุดอุปกรณ์และพิกัดสายส่งสัญญาณทางไฟฟ้าโมดูลขับเคลื่อนมอเตอร์: Dual H-Bridge Motor Driver รุ่น L298N (ขีดจำกัดกระแสขับต่อเนื่อง $2\text{ A}$ ต่อช่องทาง) ระบบเซอร์โวทางกล: เซอร์โวมอเตอร์เฟืองโลหะ MG996R จำนวน 3 ตัว (แรงบิดล็อกโรเตอร์ $15\text{ kg-cm}$ ที่ $6\text{ V}$) ทำงานที่ความเร็วสูงสุด $0.13\text{ s} / 60^\circ$ ชุดรับพิกัดดาวเทียม: โมดูล NEO-7M (u-blox) สื่อสารผ่าน UART อัตราบอดเรตมาตรฐาน $9600\text{ bps}$ ชุดรับสัญญาณคลื่นวิทยุ: เครื่องรับ FlySky FS-iA6B ย่าน $2.4\text{ GHz}$ สื่อสารด้วยระเบียบวิธี iBUS ดิจิทัลความเร็ว $115200\text{ bps}$ (ใช้รับช่องสัญญาณควบคุมแบบทางเดียว RX เท่านั้นในการปรับแต่งใหม่) เซ็นเซอร์กระแสไฟฟ้ารั่ว: หม้อแปลงแรงดันแยกไฟฟ้า (Galvanic Isolation) รุ่น ZMPT101B พิกัดวัดแรงดันสูงสุด $250\text{ V}$ พิกัดสายส่งกำลังไฟ: สายไฟทองแดงเคลือบดีบุกหุ้มฉนวน PVC มาตรฐาน UL1007 ขนาด 20AWG (โครงสร้างแกน $21 \times 0.14\text{ mm}$ ทนแรงดัน $300\text{ V}$ อุณหภูมิ $80^\circ\text{ C}$ พิกัดกระแสไหลผ่านต่อเนื่องสูงสุดในตัวถังเครื่องยนต์ที่ $11\text{ A}$) เพื่อความคงทนต่อปฏิกิริยาเคมีและความชื้นในแหล่งน้ำ 3. แผนผังการต่อวงจรและจัดสรรพินพอร์ตของระบบ (Pin Mapping Table)ส่วนประกอบต้นทาง (Component)พินฟังก์ชัน (Pin Function)พินพอร์ตควบคุม (ESP32 GPIO)ข้อกำหนดสายไฟและอินเตอร์เฟส (Wiring Spec)หมายเหตุ / หน้าที่การทำงานในระบบ (Functional Purpose)ขั้วหลักแบตเตอรี่ (+)Power Out (+)VCC / VinUL1007 20AWG (สายสีแดงหลัก) ต่อจ่ายกำลังไฟเข้าพอร์ต $12\text{V}$ ของ L298N, Input ของ UBEC และ LM2596S ขั้วหลักแบตเตอรี่ (-)Power Out (-)GNDUL1007 20AWG (สายสีดำหลัก) จุดร่วมสายดิน (Common Ground) เพื่อรักษาระดับอ้างอิงแรงดันไฟฟ้าร่วมกัน เอาต์พุต UBEC 5APower Out ($6\text{V}$)Servo VCCUL1007 20AWG (สายสีแดงแยกพอร์ต) ต่อไฟ $6\text{V}$ เลี้ยงสายสีแดงของเซอร์โว MG996R ทั้ง 3 ตัวโดยตรง เอาต์พุต LM2596SPower Out ($5\text{V}$)ESP32 VINUL1007 22AWG (สายจ่ายไฟระบบลอจิก) ต่อเลี้ยงบอร์ดประมวลผล ESP32, จีพีเอส, ตัวรับสัญญาณ และเซ็นเซอร์ ZMPT101B GPS NEO-7MTXGPIO 32 (RX1)สาย Jumper Wire แกนอ่อน 26AWGช่องรับแพ็กเกจพิกัดแผนที่ผ่าน Hardware Serial 1 ของ ESP32 FlySky FS-iA6BiBUS Servo PinGPIO 16 (RX2)สาย Jumper Wire แกนอ่อน 26AWGพอร์ตซีเรียลรับสตรีมคำสั่งบังคับพวงมาลัยเรือจากเครื่องส่งวิทยุ ZMPT101B ModuleOUT (Analog)GPIO 34 (ADC1_CH6)สาย Jumper Wire แกนอ่อน 26AWGพอร์ตรับคลื่นสัญญาณไซน์เพื่อนำไปประมวลผลหาค่า RMS กระแสไฟฟ้ารั่ว L298N DriverENAGPIO 26สาย Jumper Wire แกนอ่อน 26AWGควบคุมอัตราความเร็วรอบมอเตอร์ขับเคลื่อนฝั่งซ้าย (PWM 1kHz) L298N DriverIN1GPIO 27สาย Jumper Wire แกนอ่อน 26AWGควบคุมทิศทางเดินเรือของมอเตอร์ซ้าย (ลอจิกสถานะตรงกันข้าม) L298N DriverIN2GPIO 14สาย Jumper Wire แกนอ่อน 26AWGควบคุมทิศทางเดินเรือของมอเตอร์ซ้าย L298N DriverENBGPIO 23สาย Jumper Wire แกนอ่อน 26AWGควบคุมอัตราความเร็วรอบมอเตอร์ขับเคลื่อนฝั่งขวา (PWM 1kHz) L298N DriverIN3GPIO 18สาย Jumper Wire แกนอ่อน 26AWGควบคุมทิศทางเดินเรือมอเตอร์ขวา (แก้ปัญหาพินชนกันเรียบร้อย) L298N DriverIN4GPIO 19สาย Jumper Wire แกนอ่อน 26AWGควบคุมทิศทางเดินเรือมอเตอร์ขวา (ปลดล็อกพิน GPIO 33 สำเร็จ) Base ServoSignal (Orange)GPIO 13สายสัญญาณแกนอ่อน (พ่วง UBEC GND)ควบคุมหันแท่นสแกนทิศทางเกรเดียนท์ของแรงดันไฟฟ้าสลับ Pitch ServoSignal (Orange)GPIO 21สายสัญญาณแกนอ่อน (พ่วง UBEC GND)ควบคุมการปรับระยะและมุมกดดิ่งของแกนวัดเกรเดียนท์ใต้ท้องเรือ Gripper ServoSignal (Orange)GPIO 25สายสัญญาณแกนอ่อน (พ่วง UBEC GND)ควบคุมชุดคีมคีบพวงเศษขยะผิวน้ำที่เข้าขัดขวางหัววัดขั้วไฟฟ้า หมายเหตุ: พิน GPIO 33 และ GPIO 17 ถูกปลดปล่อยให้เป็นพินว่าง (Disconnected) ตามการแก้ไขปรับรูปแบบระบบล่าสุด 4. โครงสร้างและการจัดสรรงานซอฟต์แวร์ (Software Architecture)การเขียนซอฟต์แวร์ประยุกต์ใช้แพลตฟอร์ม FreeRTOS Dual-Core ของบอร์ด ESP32 เพื่อทำการจัดแบ่งภาระหน้าที่อย่างสมบูรณ์แบบ :4.1 การจัดสรรบนแกนประมวลผล 0 (Core 0 Tasks)TaskGPS (Priority 3): ทำหน้าที่สกัดค่าพิกัด NMEA จากสัญญาณดาวเทียมที่ไหลเข้าซีเรียลพอร์ตอย่างต่อเนื่องแบบ Non-blocking เพื่อป้องกันปัญหาข้อมูลไหลล้นบัฟเฟอร์ซีเรียล (Serial Buffer Overflow)  ทันทีที่ระบบจับสัญญาณดาวเทียมได้มากกว่าหรือเท่ากับ 5 ดวงขณะสตาร์ตเรือออกจากตลิ่ง จะบันทึกละติจูดและลองจิจูดนั้นเป็นพิกัด "Home" ทันทีเพื่อความปลอดภัย TaskTelegram (Priority 1): ตรวจเช็กสถานะตัวแปรแจ้งภัยของระบบผ่านการคุ้มกันสิทธิ์การอ่านด้วย FreeRTOS Mutex (xDataMutex)  หากตรวจจับสภาวะไฟฟ้ารั่วสะสมได้เกินระดับ $30\text{ V AC}$  งานนี้จะทำการประมวลผลลิงก์ข้อมูลแผนที่ Google Maps ตามสูตร:
+https://maps.google.com/?q=<Latitude>,<Longitude>
+และดำเนินการส่งข้อมูล HTTPS POST ไปยังคู่สายของระบบ Telegram Bot API ของพิกัดสมาร์ตโฟนผู้ควบคุม โดยติดตั้งฟังก์ชันคูลดาวน์ควบคุมความถี่ไม่ให้ส่งสัญญาณสแปมเกินรอบละ 15 วินาที 4.2 การจัดสรรบนแกนประมวลผล 1 (Core 1 Tasks - Execution Loop)ตรรกะบังคับเครื่องยนต์และขับความเร็ว (Thrust Differential Steering Mixer): ดึงค่าลอจิกจากสัญญาณวิทยุ iBUS ของพอร์ต Serial 2 แบบเรียลไทม์  และนำค่าแชนเนล 1 และ 2 มาทำการผสมสัญญาณเร่งและทิศทางเลี้ยวตามตรรกะพวงมาลัยเพื่อแยกคุมแรงดันเอาต์พุตไปยังมอเตอร์ซ้าย-ขวาผ่าน L298N ระบบนำเรือกลับจุดตั้งต้นอัตโนมัติ (RTH Failsafe): ตรวจเช็กระยะความห่างพิกัดปัจจุบันและพิกัด Home เสมอ หากคลื่นวิทยุจากผู้คุมหลุดการเชื่อมต่อเกินกว่า $1000\text{ ms}$ ระบบ RTH จะสั่งนำร่องเรือวิ่งตรงเพื่อรับทิศแบริ่ง และคำนวณหักมุมพวงมาลัยพาสู่จุดปลอดภัย (Home) ทันที การแซมพลิงและวิเคราะห์สัญญาณอนาล็อก ZMPT101B (True RMS DSP Loop): แซมพลิงด้วยความถี่สูงตลอดกรอบเวลาคาบรูปคลื่นสลับความถี่ $50\text{ Hz}$ เป็นเวลา $20\text{ ms}$ ต่อรอบ  เพื่อนำค่าที่ได้มาผ่านกระบวนการถอดรากเฉลี่ยกำลังสอง (True RMS) หักค่า DC Offset อัตโนมัติ ป้องกันปัญหาพารามิเตอร์แกว่งตัว และกรองเรียบผ่านตัวกรองเอ็กซ์โพเนนเชียลเคลื่อนที่ (EMA Filter) 5. ซอร์สโค้ดเฟิร์มแวร์โครงงานฉบับสมบูรณ์ (Production-Ready Firmware)C++/*
+  ========================================================================
+  PROJECT: Simplified RC Boat — AC Voltage Leak Detector with Telegram Alerts
+  EDITION: Telemetry & Battery Monitor Bypassed (Official Base Firmware)
+  ========================================================================
+*/
+
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
+#include <TinyGPS++.h>
+#include <IBusBM.h>
+#include <ESP32Servo.h>
+
+// ==================== [การกำหนดพินทางกายภาพ] ====================
+#define GPS_RX_PIN        32  // ขารับสัญญาณจากโมดูล GPS NEO-7M
+#define ZMPT_PIN          34  // ขารับสัญญาณอนาล็อกคลื่นไซน์จากเซ็นเซอร์ ZMPT101B (ADC1_CH6)
+
+// บอร์ดควบคุมมอเตอร์ขับเคลื่อนหลัก L298N 
+#define ENA_PIN           26  // สัญญาณ PWM คุมความเร็วฝั่งซ้าย
+#define IN1_PIN           27  // ทิศทางมอเตอร์ซ้าย 1
+#define IN2_PIN           14  // ทิศทางมอเตอร์ซ้าย 2
+#define ENB_PIN           23  // สัญญาณ PWM คุมความเร็วฝั่งขวา
+#define IN3_PIN           18  // ทิศทางมอเตอร์ขวา 1 (แก้ไขแล้ว ป้องกันการชนกับพินเซอร์โว)
+#define IN4_PIN           19  // ทิศทางมอเตอร์ขวา 2 (แก้ไขแล้ว ปลดล็อกพิน 33)
+
+// เซอร์โวมอเตอร์คุมแขนกล MG996R (พัดกระแสผ่านราง UBEC 6V แยกตัว)
+#define SERVO_BASE_PIN    13  // พินคุมเซอร์โวฐานเลี้ยว
+#define SERVO_PITCH_PIN   21  // พินคุมเซอร์โวยกแขนขึ้น-ลง
+#define SERVO_GRIP_PIN    25  // พินคุมเซอร์โวคีมจับสิ่งปฏิกูล
+
+// ==================== [ข้อมูลและค่าตัวแปรอ้างอิงหลัก] ====================
+const char* WIFI_SSID     = "YOUR_WIFI_SSID";
+const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+const char* TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN";
+const char* TELEGRAM_CHAT_ID   = "YOUR_CHAT_ID";
+
+const float ZMPT_CALIBRATION_COEFF = 0.095;   // สัมประสิทธิ์สอบเทียบหาค่า RMS จริง
+const float LEAK_THRESHOLD_VOLTS  = 30.0;    // จุดจำกัดความปลอดภัยในการแจ้งเตือน (30V AC)
+
+// โครงสร้างแชร์ข้อมูลข้ามสองแกนประมวลผล (Thread-Safety Shared Memory)
+struct NavigationData {
+  double currentLat = 0.0;
+  double currentLng = 0.0;
+  double homeLat = 0.0;
+  double homeLng = 0.0;
+  bool isHomeSet = false;
+  
+  float leakVoltageRMS = 0.0;
+  bool isLeakAlert = false;
+  bool rthActive = false;
+};
+
+volatile NavigationData navData;
+SemaphoreHandle_t xDataMutex = NULL; // ตัวล็อก Mutex ป้องกันสิทธิ์การเขียนอ่านพร้อมกัน
+
+TinyGPSPlus gps;
+IBusBM ibus;
+Servo servoBase;
+Servo servoPitch;
+Servo servoGripper;
+
+const int pwmFreq = 1000;
+const int pwmResolution = 8;
+const int channelLeft = 0;
+const int channelRight = 1;
+
+TaskHandle_t TaskGPS_Handle = NULL;
+TaskHandle_t TaskTelegram_Handle = NULL;
+
+void driveMotor(int ch, int in1, int in2, int speed);
+float calculateTrueRMS();
+String urlEncode(String str);
+
+// ==================== ====================
+void setup() {
+  Serial.begin(115200);
+  Serial1.begin(9600, SERIAL_8N1, GPS_RX_PIN, -1); // รับค่าจากจีพีเอสผ่านซีเรียล 1
+  Serial2.begin(115200, SERIAL_8N1, 16, -1);      // รับสัญญาณแชนแนลคอนโทรล iBUS (RX เท่านั้น)
+
+  xDataMutex = xSemaphoreCreateMutex();
+  if (xDataMutex == NULL) {
+    Serial.println("System Error: Semaphore initialization failed!");
+    while(1);
+  }
+
+  // ตั้งค่าเอาต์พุตวงจรขับมอเตอร์ L298N
+  pinMode(IN1_PIN, OUTPUT);
+  pinMode(IN2_PIN, OUTPUT);
+  pinMode(IN3_PIN, OUTPUT);
+  pinMode(IN4_PIN, OUTPUT);
+  
+  ledcAttach(ENA_PIN, pwmFreq, pwmResolution);
+  ledcAttach(ENB_PIN, pwmFreq, pwmResolution);
+
+  // การจัดตั้งคลาสตระกูลควบคุมเซอร์โว
+  ESP32PWM::allocateTimer(0);
+  ESP32PWM::allocateTimer(1);
+  servoBase.setPeriodHertz(50);
+  servoPitch.setPeriodHertz(50);
+  servoGripper.setPeriodHertz(50);
+  
+  servoBase.attach(SERVO_BASE_PIN, 500, 2400);
+  servoPitch.attach(SERVO_PITCH_PIN, 500, 2400);
+  servoGripper.attach(SERVO_GRIP_PIN, 500, 2400);
+
+  analogReadResolution(12);
+
+  // เริ่มต้นรับข้อมูลจากเครื่องรับ FS-iA6B เฉพาะขาเข้า
+  ibus.begin(Serial2, IBUSBM_NOTIMER);
+
+  // ยึดแยกพอร์ตการทำงานหนักไปคุมที่ Core 0
+  xTaskCreatePinnedToCore(TaskGPS, "TaskGPS", 4096, NULL, 3, &TaskGPS_Handle, 0);
+  xTaskCreatePinnedToCore(TaskTelegram, "TaskTelegram", 8192, NULL, 1, &TaskTelegram_Handle, 0);
+
+  Serial.println("System initiated. Telemetry and Battery Monitor bypassed.");
+}
+
+// ==================== ====================
+void loop() {
+  ibus.loop();
+  bool isConnected = (ibus.readChannel(0)!= 0);
+
+  double latNow = 0.0, lngNow = 0.0, hLat = 0.0, hLng = 0.0;
+  bool hSet = false, currentRthRequest = false;
+
+  if (xSemaphoreTake(xDataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+    latNow = navData.currentLat;
+    lngNow = navData.currentLng;
+    hLat = navData.homeLat;
+    hLng = navData.homeLng;
+    hSet = navData.isHomeSet;
+    currentRthRequest = navData.rthActive;
+    xSemaphoreGive(xDataMutex);
+  }
+
+  // คำนวณรากกำลังสองเฉลี่ยยอดคลื่นไฟสลับ AC ของโพรบวัด ZMPT101B
+  float currentVoltage = calculateTrueRMS();
+  bool leakAlertStatus = (currentVoltage >= LEAK_THRESHOLD_VOLTS);
+
+  // ส่งผลการประเมินวิเคราะห์แรงดันไฟฟั่วไหลเข้าหน่วยความจำเพื่อแชร์ให้งาน Telegram
+  if (xSemaphoreTake(xDataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+    navData.leakVoltageRMS = currentVoltage;
+    navData.isLeakAlert = leakAlertStatus;
+    xSemaphoreGive(xDataMutex);
+  }
+
+  // ระบบประมวลผล RTH หลุดระยะควบคุม / หรือสั่ง RTH ด้วยมือ
+  if (!isConnected || currentRthRequest) {
+    if (hSet) {
+      double distanceToHome = TinyGPSPlus::distanceBetween(latNow, lngNow, hLat, hLng);
+      if (distanceToHome > 5.0) {
+        int rthThrottle = 150; 
+        int rthSteering = 0; // วิ่งตรงชั่วคราวเพื่อตั้งลำพิกัดทิศทาง (COG)
+        
+        driveMotor(channelLeft, IN1_PIN, IN2_PIN, rthThrottle + rthSteering);
+        driveMotor(channelRight, IN3_PIN, IN4_PIN, rthThrottle - rthSteering);
+      } else {
+        driveMotor(channelLeft, IN1_PIN, IN2_PIN, 0);
+        driveMotor(channelRight, IN3_PIN, IN4_PIN, 0);
+      }
+    } else {
+      driveMotor(channelLeft, IN1_PIN, IN2_PIN, 0);
+      driveMotor(channelRight, IN3_PIN, IN4_PIN, 0);
+    }
+  } else {
+    // ระบบบังคับพวงมาลัยและแขนกลแบบไร้สายปกติ
+    int ch1 = constrain(ibus.readChannel(0), 1000, 2000); // ข้อมูลสเตียริ่งซ้ายขวา
+    int ch2 = constrain(ibus.readChannel(1), 1000, 2000); // แรงบิดความเร็วเดินหน้า
+    int ch3 = constrain(ibus.readChannel(2), 1000, 2000); // คุม Servo Pitch
+    int ch5 = constrain(ibus.readChannel(4), 1000, 2000); // คุม Servo Base
+    int ch6 = constrain(ibus.readChannel(5), 1000, 2000); // คุม Servo Gripper
+    int ch4 = constrain(ibus.readChannel(3), 1000, 2000); // สวิตช์สั่งนำเรือกลับ RTH
+
+    int throttle = map(ch2, 1000, 2000, -255, 255);
+    int steering = map(ch1, 1000, 2000, -180, 180);
+
+    if (abs(throttle) < 15) throttle = 0;
+    if (abs(steering) < 15) steering = 0;
+
+    int leftSpeed = constrain(throttle + steering, -255, 255);
+    int rightSpeed = constrain(throttle - steering, -255, 255);
+
+    driveMotor(channelLeft, IN1_PIN, IN2_PIN, leftSpeed);
+    driveMotor(channelRight, IN3_PIN, IN4_PIN, rightSpeed);
+
+    // ควบคุมกลไกข้อต่อพวงแขนคีบขยะผิวน้ำ
+    servoBase.write(map(ch5, 1000, 2000, 0, 180));
+    servoPitch.write(map(ch3, 1000, 2000, 0, 180));
+    servoGripper.write(map(ch6, 1000, 2000, 0, 180));
+
+    bool rthToggle = (ch4 > 1700);
+    if (xSemaphoreTake(xDataMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+      navData.rthActive = rthToggle;
+      xSemaphoreGive(xDataMutex);
+    }
+  }
+
+  vTaskDelay(pdMS_TO_TICKS(1));
+}
+
+// ==================== [ฟังก์ชันสนับสนุนระบบการขับเครื่องยนต์] ====================
+void driveMotor(int ch, int in1, int in2, int speed) {
+  if (speed > 0) {
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, LOW);
+    ledcWrite(ch, speed);
+  } else if (speed < 0) {
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+    ledcWrite(ch, abs(speed));
+  } else {
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, LOW);
+    ledcWrite(ch, 0);
+  }
+}
+
+// คำนวณ True RMS คลื่น AC ตลอดความคาบคลื่นความถี่ 50Hz (20ms sampling window)
+float calculateTrueRMS() {
+  unsigned long startTime = millis();
+  long sumOfSquares = 0;
+  int sampleCount = 0;
+  static float dynamicDCOffset = 2048.0; 
+
+  while (millis() - startTime < 20) { 
+    int rawVal = analogRead(ZMPT_PIN);
+    dynamicDCOffset = (0.999 * dynamicDCOffset) + (0.001 * rawVal);
+    float acComponent = rawVal - dynamicDCOffset;
+    sumOfSquares += (acComponent * acComponent);
+    sampleCount++;
+    delayMicroseconds(150);
+  }
+
+  if (sampleCount == 0) return 0.0;
+
+  float meanSquare = (float)sumOfSquares / sampleCount;
+  float rmsADC = sqrt(meanSquare);
+  float finalVoltage = rmsADC * ZMPT_CALIBRATION_COEFF;
+  
+  if (finalVoltage < 2.0) finalVoltage = 0.0; 
+  return finalVoltage;
+}
+
+// ==================== ====================
+void TaskGPS(void *pvParameters) {
+  (void) pvParameters;
+  for (;;) {
+    while (Serial1.available() > 0) {
+      char c = Serial1.read();
+      if (gps.encode(c)) {
+        if (gps.location.isValid()) {
+          double currentLat = gps.location.lat();
+          double currentLng = gps.location.lng();
+          
+          if (xSemaphoreTake(xDataMutex, pdMS_TO_TICKS(15)) == pdTRUE) {
+            navData.currentLat = currentLat;
+            navData.currentLng = currentLng;
+            
+            if (!navData.isHomeSet && gps.satellites.value() >= 5) {
+              navData.homeLat = currentLat;
+              navData.homeLng = currentLng;
+              navData.isHomeSet = true;
+              Serial.println("Safe Haven Locked via GPS.");
+            }
+            xSemaphoreGive(xDataMutex);
+          }
+        }
+      }
+    }
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
+}
+
+void TaskTelegram(void *pvParameters) {
+  (void) pvParameters;
+  WiFiClientSecure client;
+  client.setInsecure(); // บล็อกระบบการตรวจสอบใบรับรองความปลอดภัยเพื่อความเร็วสัญญาณข้ามเซิร์ฟเวอร์
+
+  unsigned long lastAlertTime = 0;
+  const unsigned long alertCooldown = 15000; // ตั้งค่าหน่วงยิงสแปมซ้ำซ้อนรอบละ 15 วินาที
+
+  for (;;) {
+    if (WiFi.status()!= WL_CONNECTED) {
+      WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+      int retryCount = 0;
+      while (WiFi.status()!= WL_CONNECTED && retryCount < 10) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        retryCount++;
+      }
+    }
+
+    bool activeAlert = false;
+    float currentVolt = 0.0;
+    double latSend = 0.0;
+    double lngSend = 0.0;
+
+    if (xSemaphoreTake(xDataMutex, pdMS_TO_TICKS(20)) == pdTRUE) {
+      activeAlert = navData.isLeakAlert;
+      currentVolt = navData.leakVoltageRMS;
+      latSend = navData.currentLat;
+      lngSend = navData.currentLng;
+      xSemaphoreGive(xDataMutex);
+    }
+
+    if (activeAlert && (millis() - lastAlertTime > alertCooldown) && WiFi.status() == WL_CONNECTED) {
+      HTTPClient http;
+      String url = "https://api.telegram.org/bot" + String(TELEGRAM_BOT_TOKEN) + "/sendMessage";
+      
+      String message = "🚨 [ตรวจพบกระแสไฟฟ้ารั่วไหลในแหล่งน้ำ] 🚨\n";
+      message += "⚡ พิกัดความแรงดันรั่วไหล: " + String(currentVolt, 1) + " V AC\n";
+      message += "📍 พิกัดเรือลาดตระเวน: " + String(latSend, 6) + ", " + String(lngSend, 6) + "\n";
+      message += "🔗 ตรวจสอบตำแหน่ง Google Maps: https://maps.google.com/?q=" + String(latSend, 6) + "," + String(lngSend, 6) + "\n";
+      message += "⚠️ คำแนะนำ: ร้องเรียนตัดไฟทันที! ระงับกิจกรรมทางน้ำบริเวณนี้";
+
+      http.begin(client, url);
+      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+      
+      String httpRequestData = "chat_id=" + String(TELEGRAM_CHAT_ID) + "&text=" + urlEncode(message);
+      int httpResponseCode = http.POST(httpRequestData);
+      
+      if (httpResponseCode > 0) {
+        Serial.println("Telegram Notification Dispatched Successfully.");
+        lastAlertTime = millis();
+      }
+      http.end();
+    }
+    vTaskDelay(pdMS_TO_TICKS(2000));
+  }
+}
+
+String urlEncode(String str) {
+  String encodedString = "";
+  char c;
+  char code0;
+  char code1;
+  for (int i = 0; i < str.length(); i++) {
+    c = str.charAt(i);
+    if (c == ' ') {
+      encodedString += '+';
+    } else if (isalnum(c)) {
+      encodedString += c;
+    } else {
+      code1 = (c & 0xf) + '0';
+      if ((c & 0xf) > 9) {
+        code1 = (c & 0xf) - 10 + 'A';
+      }
+      c = (c >> 4) & 0xf;
+      code0 = c + '0';
+      if (c > 9) {
+        code0 = c - 10 + 'A';
+      }
+      encodedString += '%';
+      encodedString += code0;
+      encodedString += code1;
+    }
+  }
+  return encodedString;
+}

@@ -1,0 +1,51 @@
+esp32 -spec
+Features:
+1. The module is an ESP-WROOM-32 development board, and ESP-WROOM-32 parameter specifications refer to the parameter specifications of the module.
+2.802.11B/G/WIFI + BT module; Low power dual-core 32-bit processor can be used as an application processor;
+3. Main frequency can reach up to 240MHz and computing power can reach up to 600dmips; 520KB SRAM built-in;
+4. Support interfaces such as UART/SPI/I2C/PWM/DAC/ADC; Support OPENOCD debug interface;
+5. Supports multiple sleep modes with a current as low as 6.5UA during deep sleep; Embedded LWIP and FREERTOS;
+6. Support STA/AP/STA+AP mode; Support smart configuration/AIRKISS one-click deployment network;
+7. Universal AT command, easy to use; Support local serial port upgrade and remote upgrade.
+
+
+
+Description:
+The main body of the module is TYPE-C module, which uses a USB to CP2102 serial port chip to expand the ESP-WROOM-32 interface. It can be directly connected to the computer for debugging, and data transmission is fast and stable. There is a power indicator light (red light) and working status indicator light (blue light) on it, which allows you to know the status of the module at any time. There are two touch buttons, one resets and the other allows the module to enter download program mode. Moreover, the pins on both sides of the development board can make it easier for developers to connect and use.
+The module has powerful Bluetooth and WIFI functions. As a Bluetooth and WIFI development board, it can access rich resources. In addition, the module supports multiple development environments, expands its existing resources and greatly improves the ease of learning and development. Of course, home automation, wireless industrial control, wireless positioning system signals, etc. It can also be widely used in IoT applications such as
+
+
+
+Parameters:
+Size: W*L 28.5mm*51.8mm
+SPIFlash: default 32M bit
+Bluetooth: Bluetooth 4.2BR/EDR and BLE standards
+WiFi: 802.11b/g/n/
+Supported interfaces: UART, SPI, SDIO, 12C, PWM, 12S, IR, ADC, DAC
+On chip sensors: hall sensors, temperature sensors, capacitive touch sensors
+LO port: 22
+Serial port speed: default 115200bps
+Spectrum range: 2412 ~ 2484MHz
+Antenna form: internal PcB antenna with 2dBi gain
+
+Transmission power:
+802.11b: 17 ground 2dBm (@ 11Mbps)
+802.11g: 14 + 2dBm (@ 54Mbps)
+802.11n: 13 ± 2dBm (@ MCS7)
+
+Receive sensitivity:
+CCK, 1Mbps: -90dBm
+CCK, 11Mbps: -85dBm
+6Mbps (1/2BPSK): - 88dBm
+54Mbps (3/464-QAM): -70dBm
+MCS7 (65Mbps, 72.2Mbps): -67dBm
+
+Power consumption: 300mA@3.3v
+Security: WPA/WPA2/WPA2 Enterprise/WPS
+Power supply range: USB power supply: 5v
+Vin pin power source: 5.0v ~ 12V
+
+
+
+Package include:
+1X development board
